@@ -1,1 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Va-et-vient booléen XOR</title>
+<style>
+  body { font-family: system-ui, sans-serif; background:#0f172a; color:#e2e8f0; text-align:center; margin:0; padding:20px;}
+  canvas { background:#0b1220; border:1px solid #334155; border-radius:12px; margin-top:10px; }
+  .controls { margin:15px auto; display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+  label { font-size:14px; }
+  input[type=range] { width:180px; }
+  .led { display:inline-block; width:18px; height:18px; border-radius:50%; background:#334155; margin:0 6px; vertical-align:middle; box-shadow:0 0 10px #000;}
+  .on { background:#22c55e; box-shadow:0 0 20px #22c55e;}
+</style>
+</head>
+<body>
+<h2>Animation interactive Va-et-vient Booléen + XOR</h2>
+<canvas id="c" width="900" height="300"></canvas>
 
+<div class="controls">
+  <label>Vitesse A <input id="sA" type="range" min="0.2" max="3" step="0.1" value="1"></label>
+  <label>Vitesse B <input id="sB" type="range" min="0.2" max="3" step="0.1" value="1.7"></label>
+  <button id="pause">Pause</button>
+</div>
+
+<div>
+  A <span class="led" id="ledA"></span>
+  B <span class="led" id="ledB"></span>
+  A XOR B <span class="led" id="ledX"></span>
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const sA = document.getElementById('sA');
+const sB = document.getElementById('sB');
+const ledA = document.getElementById('ledA');
+const ledB = document.getElementById('ledB');
+const ledX = document.getElementById('ledX');
+document.getElementById('pause').onclick = e => { running = !running; e.target.textContent = running ? 'Pause' : 'Play'; };
+
+let running = true;
+let t = 0;
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  
+  const freqA = parseFloat(sA.value);
+  const freqB = parseFloat(sB.value);
+  
+  // position va-et-vient : sin -> [-1,1]
+  const xA = 250 + Math.sin(t * freqA * 0.002) * 120;
+  const xB = 650 + Math.sin(t * freqB * 0.002 + 1.2) * 120;
+  
+  const boolA = Math.sin(t * freqA * 0.002) > 0;
+  const boolB = Math.sin(t * freqB * 0.002 + 1.2) > 0;
+  const xor = boolA !== boolB;
+
+  // sol
+  ctx.strokeStyle = '#334155';
+  ctx.beginPath();
+  ctx.moveTo(50,200); ctx.lineTo(850,200);
+  ctx.stroke();
+
+  // oscillateurs
+  function drawOsc(x, color, label){
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(x,180,22,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '14px system-ui';
+    ctx.fillText(label, x-10, 230);
+  }
+  drawOsc(xA, '#60a5fa', 'A');
+  drawOsc(xB, '#f472b6', 'B');
+
+  // zone booléenne
+  ctx.fillStyle = 'rgba(100,116,139,0.2)';
+  ctx.fillRect(170,140,160,80);
+  ctx.fillRect(570,140,160,80);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '12px system-ui';
+  ctx.fillText('FALSE', 210, 135);
+  ctx.fillText('TRUE', 210, 215);
+  ctx.fillText('FALSE', 610, 135);
+  ctx.fillText('TRUE', 610, 215);
+
+  // lampe XOR
+  ctx.fillStyle = xor ? '#22c55e' : '#334155';
+  ctx.shadowColor = xor ? '#22c55e' : 'transparent';
+  ctx.shadowBlur = 30;
+  ctx.beginPath(); ctx.arc(450,180,28,0,Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '16px system-ui';
+  ctx.fillText('XOR', 435, 230);
+
+  // LEDs
+  ledA.className = 'led ' + (boolA ? 'on' : '');
+  ledB.className = 'led ' + (boolB ? 'on' : '');
+  ledX.className = 'led ' + (xor ? 'on' : '');
+
+  if(running) t += 16;
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
