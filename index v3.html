@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Circuit Simulator | Pro Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #05070a;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #00d2ff;
+            --accent-gold: #ffcc00;
+            --text-main: #e2e8f0;
+            --text-dim: #64748b;
+            --danger: #ff4757;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% 50%, #101827 0%, #05070a 100%);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            background: linear-gradient(to right, #fff, var-accent-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- LAYOUT --- */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            grid-template-rows: auto auto;
+            gap: 25px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* --- PANNEAU INTERACTIF (GAUCHE) --- */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lamp-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+        }
+
+        #lamp {
+            width: 100%;
+            height: 100%;
+            background: #1e293b;
+            border-radius: 50%;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid var(--glass-border);
+            position: relative;
+            z-index: 2;
+        }
+
+        #lamp.on {
+            background: radial-gradient(circle, var(--accent-gold) 0%, #b8860b 100%);
+            box-shadow: 0 0 60px var(--accent-gold), 0 0 20px rgba(255, 204, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Effet d'ombre de la lampe */
+        .lamp-glow {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 50%;
+            opacity: 0;
+            transition: 0.5s;
+            background: var(--accent-gold);
+            filter: blur(40px);
+            z-index: 1;
+        }
+        #lamp.on + .lamp-glow { opacity: 0.6; }
+
+        .switches-row {
+            display: flex;
+            gap: 40px;
+        }
+
+        .switch-box { text-align: center; }
+        .switch-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+        }
+
+        .toggle {
+            width: 50px;
+            height: 90px;
+            background: #0f172a;
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.8);
+        }
+
+        .lever {
+            width: 40px;
+            height: 40px;
+            background: #f8fafc;
+            border-radius: 50%;
+            position: absolute;
+            left: 5px;
+            top: 5px;
+            transition: 0-all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .lever.active { top: 45px; background: var(--accent-blue); }
+
+        /* --- TABLE DE VÉRITÉ (DROITE HAUT) --- */
+        .truth-table-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        th {
+            color: var(--text-dim);
+            font-weight: 300;
+            padding-bottom: 15px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        td {
+            padding: 15px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        tr.active-row td {
+            background: rgba(0, 210, 255, 0.1);
+            color: var(--accent-blue);
+            border-top: 1px solid var(--accent-blue);
+            border-bottom: 1px solid var(--accent-blue);
+            font-weight: bold;
+        }
+
+        /* --- CHRONOGRAMME (DROITE BAS) --- */
+        .chronogram-panel {
+            grid-column: 1 / -1;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: #0a0f16;
+            border-radius: 15px;
+            margin-top: 20px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        canvas { width: 100%; height: 100%; }
+
+        .legend {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Circuit Intelligence</h1>
+
+    <div class="dashboard">
+        <!-- 1. PANNEAU DE CONTRÔLE -->
+        <div class="card control-panel">
+            <div class="lamp-container">
+                <div id="lamp"></div>
+                <div class="lamp-glow"></div>
+            </div>
+            <p id="status-text" style="font-size: 0.8rem; letter-spacing: 2px; color: var(--text-dim);">SYSTEM READY</p>
+
+            <div class="switches-row">
+                <div class="switch-box">
+                    <span class="switch-label">INPUT A</span>
+                    <div class="toggle" onclick="toggle('A')">
+                        <div id="leverA" class="lever"></div>
+                    </div>
+                </div>
+                <div class="switch-box">
+                    <span class="switch-label">INPUT B</span>
+                    <div class="toggle" onclick="toggle('B')">
+                        <div id="leverB" class="lever"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. TABLE DE VÉRITÉ -->
+        <div class="card truth-table-panel">
+            <h3 style="margin: 0 0 15px 0; font-weight: 300; font-size: 1.1rem;">Logic Verification</h3>
+            <table>
+                <thead>
+                    <tr><th>A</th><th>B</th><th>Output (L)</th></tr>
+                </thead>
+                <tbody>
+                    <tr id="row-00" data-a="0" data-b="0"><td>0</td><td>0</td><td>0</td></tr>
+                    <tr id="row-01" data-a="0" data-b="1"><td>0</td><td>1</td><td>1</td></tr>
+                    <tr id="row-10" data-a="1" data-b="0"><td>1</td><td>0</td><td>1</td></tr>
+                    <tr id="row-11" data-a="1" data-b="1"><td>1</td><td>1</td><td>0</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 3. CHRONOGRAMME -->
+        <div class="card chronogram-panel">
+            <h3 style="margin: 0; font-weight: 300; font-size: 1.1rem;">Real-time Oscilloscope</h3>
+            <div class="canvas-wrapper">
+                <div class="legend">SIGNAL MONITORING [XOR GATE]</div>
+                <canvas id="chartCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = { A: 0, B: 0 };
+        let history = [];
+
+        function toggle(id) {
+            state[id] = state[id] === 0 ? 1 : 0;
+            const lever = document.getElementById('lever' + id);
+            state[id] === 1 ? lever.classList.add('active') : lever.classList.remove('active');
+            update();
+        }
+
+        function update() {
+            const isOn = state.A !== state.B;
+            const lamp = document.getElementById('lamp');
+            const status = document.getElementById('status-text');
+
+            // Lampe & Status
+            if (isOn) {
+                lamp.classList.add('on');
+                status.innerText = "STATE: ACTIVE";
+                status.style.color = "var(--accent-gold)";
+            } else {
+                lamp.classList.remove('on');
+                status.innerText = "STATE: STANDBY";
+                status.style.color = "var(--text-dim)";
+            }
+
+            // Table de vérité
+            document.querySelectorAll('tr').forEach(r => r.classList.remove('active-row'));
+            const rowId = `row-${state.A}${state.B}`;
+            document.getElementById(rowId).classList.add('active-row');
+
+            // Chronogramme
+            addHistory(state.A, state.B, isOn ? 1 : 0);
+        }
+
+        // --- OSCILLOSCOPE ENGINE ---
+        const canvas = document.getElementById('chartCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function addHistory(a, b, l) {
+            history.push({a, b, l});
+            if (history.length > 100) history.shift();
+            draw();
+        }
+
+        function draw() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const step = canvas.width / 100;
+            
+            const drawSignal = (key, color, yBase) => {
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.lineJoin = "round";
+
+                history.forEach((p, i) => {
+                    const x = i * step;
+                    const y = yBase + (p[key] === 1 ? 0 : 40);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                // Dessiner les points de connexion
+                ctx.fillStyle = color;
+                history.forEach((p, i) => {
+                    const x = i * step;
+                    const y = yBase + (p[key] === 1 ? 0 : 40);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            };
+
+            // Dessin des 3 voies avec espacement
+            drawSignal('a', '#00d2ff', 30);  // A
+            drawSignal('b', '#8e44ad', 80);  // B
+            drawSignal('l', '#ffcc00', 130); // L (Output)
+        }
+
+        // Initialisation
+        window.onload = () => {
+            update();
+            // Animation de démarrage du canvas
+            setInterval(draw, 50); 
+        };
+    </script>
+</body>
+</html>
