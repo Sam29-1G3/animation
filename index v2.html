@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Va-et-Vient Électrique - Animation Interactive</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6bff;
+            --primary-dark: #3a5bef;
+            --success: #51cf66;
+            --danger: #ff3860;
+            --bg-light: #f5f7fa;
+            --bg-dark: #1a1a2e;
+            --text-light: #212529;
+            --text-dark: #f8f9fa;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-light), #e0e0e0);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode {
+            --bg-light: #1a1a2e;
+            --text-light: #f8f9fa;
+            background: linear-gradient(135deg, var(--bg-light), #0f0f1a);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .container {
+            background: rgba(30, 30, 50, 0.95);
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: url('data:image/svg+xml;utf8,<svg width="100" height="10" viewBox="0 0 100 10" preserveAspectRatio="none"><path d="M0,5 Q25,0 50,5 T100,5 L100,10 L0,10 Z" fill="%23ff6b6b"/></svg>');
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .circuit-section {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+            transition: var(--transition);
+        }
+
+        body.dark-mode .circuit-section {
+            background: rgba(40, 40, 60, 0.8);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .switches-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .switch-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .switch-label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Interrupteur futuriste amélioré */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 90px;
+            height: 45px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+            border-radius: 40px;
+            transition: var(--transition);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 36px;
+            width: 36px;
+            left: 4px;
+            bottom: 4px;
+            background: linear-gradient(135deg, #ffffff, #f0f0f0);
+            border-radius: 50%;
+            transition: var(--transition);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked + .slider {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: inset 0 2px 10px rgba(74, 107, 255, 0.4);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(45px);
+            background: linear-gradient(135deg, #4a6bff, #3a5bef);
+            box-shadow: 0 2px 10px rgba(74, 107, 255, 0.5);
+        }
+
+        .lamp-section {
+            text-align: center;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .lamp-base {
+            width: 140px;
+            height: 35px;
+            background: #333;
+            border-radius: 20px;
+            margin: 0 auto 25px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .lamp-base::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 25px;
+            background: #333;
+            border-radius: 50%;
+        }
+
+        .lamp {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 30% 30%, #333 0%, #111 100%);
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .lamp.on {
+            background: radial-gradient(circle at 30% 30%, #FFEB3B 0%, #FFC107 50%, #FF9800 100%);
+            box-shadow: 0 0 50px rgba(255, 235, 59, 0.7),
+                        0 0 80px rgba(255, 152, 0, 0.4);
+        }
+
+        .lamp-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+            opacity: 0.7;
+            filter: blur(20px);
+            animation: pulse 2s infinite alternate;
+            transition: all 0.3s ease;
+        }
+
+        .lamp.on .lamp-glow {
+            background: radial-gradient(circle, rgba(255,235,59,0.5) 0%, transparent 70%);
+            animation: glow 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.5; }
+            to { opacity: 0.9; }
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(255, 235, 59, 0.5); }
+            to { box-shadow: 0 0 60px rgba(255, 235, 59, 0.9); }
+        }
+
+        .lamp-state {
+            margin-top: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .lamp-state.on {
+            color: var(--success);
+        }
+
+        .lamp-state.off {
+            color: var(--danger);
+        }
+
+        .wires {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            position: relative;
+            margin: 30px 0;
+            border-radius: 3px;
+        }
+
+        .wire {
+            position: absolute;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 3px;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .wire1 {
+            width: 30%;
+            top: -3px;
+            left: 15%;
+        }
+
+        .wire2 {
+            width: 40%;
+            top: -3px;
+            left: 35%;
+        }
+
+        .wire3 {
+            width: 30%;
+            top: -3px;
+            left: 65%;
+        }
+
+        .circuit-container {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        .tables-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .table-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .table-card {
+            background: rgba(40, 40, 60, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .table-card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(74, 107, 255, 0.03);
+        }
+
+        body.dark-mode tr:nth-child(even) {
+            background: rgba(74, 107, 255, 0.1);
+        }
+
+        tr:hover td {
+            background: rgba(74, 107, 255, 0.1);
+        }
+
+        .state {
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        .state.on {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        }
+
+        .state.off {
+            background: rgba(244, 67, 54, 0.2);
+            color: var(--danger);
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+        }
+
+        .current-state {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+            color: white !important;
+            font-weight: bold;
+        }
+
+        .chronogram-section {
+            margin-top: 50px;
+        }
+
+        .chronogram-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .chronogram-container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode .chronogram-container {
+            background: rgba(40, 40, 60, 0.8);
+        }
+
+        .chronogram {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode .chronogram {
+            background: linear-gradient(135deg, #2d2d44, #1a1a2e);
+        }
+
+        .time-axis {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .time-ticks {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .signal {
+            position: absolute;
+            height: 100%;
+            border-radius: 2px;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .signal.s1 {
+            bottom: 0;
+            background: linear-gradient(135deg, #2196F3, #0D47A1);
+            width: 2px;
+            left: 15%;
+        }
+
+        .signal.s2 {
+            bottom: 0;
+            background: linear-gradient(135deg, #FF9800, #E65100);
+            width: 2px;
+            left: 40%;
+        }
+
+        .signal.lamp {
+            bottom: 0;
+            background: linear-gradient(135deg, #FFEB3B, #F57F17);
+            width: 3px;
+            border-radius: 1px;
+            left: 65%;
+        }
+
+        .signal-label {
+            position: absolute;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 3px 8px;
+            border-radius: 15px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(74, 107, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #37b24d);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(81, 207, 102, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 30px;
+            color: var(--primary);
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate:nth-child(1) { animation-delay: 0.1s; }
+        .animate:nth-child(2) { animation-delay: 0.2s; }
+        .animate:nth-child(3) { animation-delay: 0.3s; }
+        .animate:nth-child(4) { animation-delay: 0.4s; }
+        .animate:nth-child(5) { animation-delay: 0.5s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .switches-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .switch-container {
+                margin-bottom: 25px;
+            }
+
+            .tables-section {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <i class="fas fa-bolt"></i>
+            <h1>Va-et-Vient Électrique</h1>
+            <p class="subtitle"><i class="fas fa-cog"></i> Animation interactive avec table de vérité dynamique</p>
+            <button class="mode-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="main-content">
+            <div class="circuit-section animate">
+                <h2 class="section-title">
+                    <i class="fas fa-project-diagram"></i>
+                    Circuit Électrique
+                </h2>
+
+                <div class="switches-container">
+                    <div class="switch-container animate">
+                        <span class="switch-label">Interrupteur 1</span>
+                        <label class="switch">
+                            <input type="checkbox" id="switch1" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="switch-container animate">
+                        <span class="switch-label">Interrupteur 2</span>
+                        <label class="switch">
+                            <input type="checkbox" id="switch2" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="circuit-container">
+                    <div class="wires">
+                        <div class="wire wire1"></div>
+                        <div class="wire wire2"></div>
+                        <div class="wire wire3"></div>
+                    </div>
+
+                    <div class="lamp-section animate">
+                        <div class="lamp-base"></div>
+                        <div class="lamp" id="lamp">
+                            <div class="lamp-glow"></div>
+                        </div>
+                        <div class="lamp-state" id="lamp-state">
+                            <i class="fas fa-lightbulb"></i> État:
+                            <span class="state off">ÉTEINTE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tables-section">
+                <div class="table-card animate">
+                    <h2><i class="fas fa-table"></i> Table de Vérité Dynamique</h2>
+                    <div class="table-responsive">
+                        <table id="truth-table">
+                            <thead>
+                                <tr>
+                                    <th>Interrupteur 1</th>
+                                    <th>Interrupteur 2</th>
+                                    <th>État de la Lampe</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="truth-table-body">
+                                <!-- Contenu généré par JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-card animate">
+                    <h2><i class="fas fa-chart-line"></i> Chronogramme en Temps Réel</h2>
+                    <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">
+                        Évolution des signaux en fonction des interrupteurs
+                    </p>
+                    <div class="chronogram-container">
+                        <div class="chronogram" id="chronogram">
+                            <div class="time-axis"></div>
+                            <div class="time-ticks">
+                                <span>0s</span>
+                                <span>1s</span>
+                                <span>2s</span>
+                                <span>3s</span>
+                                <span>4s</span>
+                            </div>
+                            <div class="signal s1" id="sig-s1"></div>
+                            <div class="signal s2" id="sig-s2"></div>
+                            <div class="signal lamp" id="sig-lamp"></div>
+                            <div class="signal-label" style="top: 50%; left: -10px;">S1</div>
+                            <div class="signal-label" style="top: 30%; left: -10px;">S2</div>
+                            <div class="signal-label" style="top: 70%; right: -10px;">Lampe</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls animate">
+                <button class="btn btn-success" id="randomize-btn">
+                    <i class="fas fa-random"></i> Combinaison Aléatoire
+                </button>
+                <button class="btn btn-secondary" id="reset-btn">
+                    <i class="fas fa-redo"></i> Réinitialiser
+                </button>
+                <button class="btn btn-primary" id="auto-toggle-btn">
+                    <i class="fas fa-play" id="play-icon"></i>
+                    <span id="auto-text">Mode Auto</span>
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            <p>⚡ Animation interactive avec HTML5, CSS3 et JavaScript | Suivi en temps réel</p>
+        </footer>
+    </div>
+
+    <script>
+        // Éléments DOM
+        const switch1 = document.getElementById('switch1');
+        const switch2 = document.getElementById('switch2');
+        const lamp = document.getElementById('lamp');
+        const lampState = document.getElementById('lamp-state');
+        const themeToggle = document.getElementById('theme-toggle');
+        const randomizeBtn = document.getElementById('randomize-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const autoToggleBtn = document.getElementById('auto-toggle-btn');
+        const playIcon = document.getElementById('play-icon');
+        const autoText = document.getElementById('auto-text');
+
+        // Chronogramme
+        const sigS1 = document.getElementById('sig-s1');
+        const sigS2 = document.getElementById('sig-s2');
+        const sigLamp = document.getElementById('sig-lamp');
+
+        // Table de vérité
+        const truthTableBody = document.getElementById('truth-table-body');
+
+        // État de l'animation automatique
+        let isAutoMode = false;
+        let autoInterval;
+
+        // Logique du va-et-vient
+        function updateLampState() {
+            const s1State = switch1.checked;
+            const s2State = switch2.checked;
+            const isOn = s1State !== s2State;
+
+            // Animation de la lampe
+            if (isOn) {
+                lamp.classList.add('on');
+                lampState.innerHTML = '<i class="fas fa-lightbulb"></i> État: <span class="state on">ALLUMÉE</span>';
+                sigLamp.style.height = '100%';
+            } else {
+                lamp.classList.remove('on');
+                lampState.innerHTML = '<i class="fas fa-lightbulb"></i> État: <span class="state off">ÉTEINTE</span>';
+                sigLamp.style.height = '0%';
+            }
+
+            // Mise à jour de la table de vérité
+            updateTruthTable(s1State, s2State, isOn);
+
+            // Animation des fils électriques
+            animateWires(s1State, s2State);
+        }
+
+        // Animation des fils
+        function animateWires(s1, s2) {
+            const wire1 = document.querySelector('.wire1');
+            const wire2 = document.querySelector('.wire2');
+            const wire3 = document.querySelector('.wire3');
+
+            // Réinitialiser les animations
+            wire1.style.transform = 'scaleY(1)';
+            wire2.style.transform = 'scaleY(1)';
+            wire3.style.transform = 'scaleY(1)';
+
+            // Animation des fils actifs
+            if (s1) wire1.style.transform = 'scaleY(1.2)';
+            if (s2) wire2.style.transform = 'scaleY(1.2)';
+        }
+
+        // Mise à jour de la table de vérité
+        function updateTruthTable(s1, s2, lampOn) {
+            // Effacer l'ancienne table
+            truthTableBody.innerHTML = '';
+
+            // Créer les 4 combinaisons possibles
+            const combinations = [
+                { s1: true, s2: true, lamp: false },
+                { s1: true, s2: false, lamp: true },
+                { s1: false, s2: true, lamp: true },
+                { s1: false, s2: false, lamp: false }
+            ];
+
+            combinations.forEach((comb, index) => {
+                const row = document.createElement('tr');
+
+                // Interrupteur 1
+                const s1Cell = document.createElement('td');
+                s1Cell.innerHTML = comb.s1 ?
+                    '<span class="state on"><i class="fas fa-toggle-on"></i> ON</span>' :
+                    '<span class="state off"><i class="fas fa-toggle-off"></i> OFF</span>';
+
+                // Interrupteur 2
+                const s2Cell = document.createElement('td');
+                s2Cell.innerHTML = comb.s2 ?
+                    '<span class="state on"><i class="fas fa-toggle-on"></i> ON</span>' :
+                    '<span class="state off"><i class="fas fa-toggle-off"></i> OFF</span>';
+
+                // Lampe
+                const lampCell = document.createElement('td');
+                lampCell.innerHTML = comb.lamp ?
+                    '<span class="state on"><i class="fas fa-lightbulb"></i> ALLUMÉE</span>' :
+                    '<span class="state off"><i class="fas fa-lightbulb-slash"></i> ÉTEINTE</span>';
+
+                // Case "Action" - Mettre en surbrillance la ligne actuelle
+                const actionCell = document.createElement('td');
+                if (s1 === comb.s1 && s2 === comb.s2) {
+                    actionCell.innerHTML = '<span class="state current-state">ACTUEL</span>';
+                    row.style.outline = '2px solid var(--primary)';
+                    row.style.outlineOffset = '-2px';
+                } else {
+                    actionCell.innerHTML = '<span class="state" style="background: transparent; color: #666;">...</span>';
+                }
+
+                row.appendChild(s1Cell);
+                row.appendChild(s2Cell);
+                row.appendChild(lampCell);
+                row.appendChild(actionCell);
+
+                truthTableBody.appendChild(row);
+            });
+        }
+
+        // Mise à jour du chronogramme
+        function updateChronogram() {
+            const s1Height = switch1.checked ? '100%' : '0%';
+            const s2Height = switch2.checked ? '100%' : '0%';
+
+            // Animation des signaux
+            sigS1.style.height = s1Height;
+            sigS2.style.height = s2Height;
+
+            updateLampState();
+        }
+
+        // Mode automatique
+        function startAutoMode() {
+            if (isAutoMode) return;
+
+            isAutoMode = true;
+            autoText.textContent = 'Mode Auto';
+            playIcon.className = 'fas fa-pause';
+
+            // Changer les interrupteurs aléatoirement toutes les 1.5 secondes
+            autoInterval = setInterval(() => {
+                switch1.checked = Math.random() > 0.5;
+                switch2.checked = Math.random() > 0.5;
+                updateChronogram();
+
+                // Animation du bouton
+                autoToggleBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    autoToggleBtn.style.transform = 'scale(1)';
+                }, 150);
+            }, 1500);
+        }
+
+        function stopAutoMode() {
+            isAutoMode = false;
+            autoText.textContent = 'Mode Auto';
+            playIcon.className = 'fas fa-play';
+            clearInterval(autoInterval);
+        }
+
+        // Gestion du thème sombre/claire
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = themeToggle.querySelector('i');
+            icon.classList.toggle('fa-moon');
+            icon.classList.toggle('fa-sun');
+        });
+
+        // Bouton aléatoire
+        randomizeBtn.addEventListener('click', () => {
+            switch1.checked = Math.random() > 0.5;
+            switch2.checked = Math.random() > 0.5;
+            updateChronogram();
+
+            // Animation
+            randomizeBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                randomizeBtn.style.transform = 'scale(1)';
+            }, 150);
+        });
+
+        // Bouton réinitialiser
+        resetBtn.addEventListener('click', () => {
+            switch1.checked = true;
+            switch2.checked = true;
+            updateChronogram();
+
+            resetBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                resetBtn.style.transform = 'scale(1)';
+            }, 150);
+        });
+
+        // Mode automatique
+        autoToggleBtn.addEventListener('click', () => {
+            if (isAutoMode) {
+                stopAutoMode();
+            } else {
+                startAutoMode();
+            }
+        });
+
+        // Événements des interrupteurs
+        switch1.addEventListener('change', updateChronogram);
+        switch2.addEventListener('change', updateChronogram);
+
+        // Gestion du clic sur les cellules de la table
+        truthTableBody.addEventListener('click', (e) => {
+            if (e.target.closest('.state.current-state')) return;
+
+            const row = e.target.closest('tr');
+            if (!row) return;
+
+            const cells = row.querySelectorAll('td');
+            const s1State = cells[0].textContent.includes('ON');
+            const s2State = cells[1].textContent.includes('ON');
+
+            // Mettre à jour les interrupteurs
+            switch1.checked = s1State;
+            switch2.checked = s2State;
+
+            updateChronogram();
+
+            // Animation
+            row.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                row.style.transform = 'scale(1)';
+            }, 150);
+        });
+
+        // Initialisation
+        updateChronogram();
+
+        // Animation au chargement
+        window.addEventListener('load', () => {
+            const container = document.querySelector('.container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                container.style.transition = 'all 0.8s ease-out';
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
