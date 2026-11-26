@@ -1,6 +1,6 @@
 # animation
 test
 
-- [vv1](./vv1.html)
-- [vv2](./vv2.html)
-- [vv3](./vv3.html)
+- [vv1](./vv1.html)Gemini
+- [vv2](./vv2.html)Meta
+- [vv3](./vv3.html) MistralAi
